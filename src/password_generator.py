@@ -8,6 +8,7 @@ Funciona con Python 3.8+ y usa el módulo `secrets` para generación segura.
 import secrets
 import string
 import random
+import argparse
 from typing import List
 
 
@@ -97,5 +98,32 @@ def main() -> None:
     print("\nContraseña generada:", pwd)
 
 
+def _cli_main() -> None:
+    parser = argparse.ArgumentParser(description="Generador de contraseñas seguras")
+    parser.add_argument("--length", "-l", type=int, help="Longitud de la contraseña")
+    parser.add_argument("--no-uppercase", action="store_true", help="Desactivar mayúsculas")
+    parser.add_argument("--no-digits", action="store_true", help="Desactivar dígitos")
+    parser.add_argument("--no-special", action="store_true", help="Desactivar caracteres especiales")
+
+    args = parser.parse_args()
+
+    # If any CLI argument provided, operate in non-interactive mode
+    if args.length is not None or args.no_uppercase or args.no_digits or args.no_special:
+        length = args.length if args.length is not None else 12
+        use_uppercase = not args.no_uppercase
+        use_digits = not args.no_digits
+        use_special_chars = not args.no_special
+
+        try:
+            pwd = generate_password(length, use_uppercase, use_digits, use_special_chars)
+        except ValueError as exc:
+            print(f"Error: {exc}")
+            raise SystemExit(2)
+
+        print(pwd)
+    else:
+        main()
+
+
 if __name__ == "__main__":
-    main()
+    _cli_main()
